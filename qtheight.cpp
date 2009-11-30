@@ -27,6 +27,7 @@ void qtheight::build_height(void)
 {
 	QList<int> alb_zones;
 	alb_zones << 0 << 1 << 2 << 3 << 4 << 6 << 7 << 8 << 9 << 10 << 11 << 12 << 14 << 15;
+//	alb_zones << 0 ;
 	this->read_zone_structure();	
 	for (int i = 0; i < alb_zones.size(); ++i) 
 	{
@@ -53,6 +54,8 @@ bool qtheight::read_zone_structure(void)
 	{
 		QString line = zin.readLine();
 		QStringList attrs = line.split(":");
+		//QString debugs=QString("%1:%2:%3").arg(attrs.at(0)).arg(attrs.at(1)).arg(attrs.at(2));
+//		qDebug( QString("%1").arg(debugs).toAscii() );
 		this->zone_structure[attrs.at(0)]=QString("%1:%2").arg(attrs.at(1)).arg(attrs.at(2));
 	}
 	file.close();
@@ -98,7 +101,6 @@ bool qtheight::build_zone(QString zone_number)
 			offsetfactor=attrs.at(1).toInt();
 	}
 	file.close();
-	
 	if (! zone_structure.contains(zone_number) )
 		return(false);
 
@@ -127,7 +129,7 @@ bool qtheight::build_zone(QString zone_number)
 			MagickGetImagePixels(this->offset_img, x, y, 1, 1, "I", FloatPixel, pixel_array);
 			off_depth=(int)(pixel_array[0]*256);
 			height=(tex_depth*scalefactor) + (off_depth*offsetfactor);
-			height*=2.5f;
+			height*=4.0f;
 			ipixel_array[0]=(int)height;
 			MagickSetImagePixels(this->out_img,(rx*64)+x,(ry*64)+y,1,1,"I", ShortPixel,ipixel_array );
 		}
@@ -149,11 +151,13 @@ bool qtheight::extract_mpak(QString mpak,QString file,QString save_path)
 	//char inbuf[1024], outbuf[1024];
 	int inlen = 0;
 	int stage = 0;
-	if (!(fp = fopen(mpak.toAscii(), "r")))
+	
+	if (!(fp = fopen(mpak.toAscii(), "rb")))
 	{
 		perror(mpak.toAscii());
 		return(false);
 	}
+	qDebug("start seek");
 	// read and check header
 	fseek(fp, 0, SEEK_SET);
 	fread (inbuf,1,4,fp);
@@ -163,6 +167,7 @@ bool qtheight::extract_mpak(QString mpak,QString file,QString save_path)
 	
 	fseek(fp, 21, SEEK_SET);
 	inflateInit(&stream);    
+	qDebug("start unzip");
 	while (!feof(fp) || inlen > 0)
 	{
 		int rc=0;
@@ -224,14 +229,9 @@ void qtheight::processData(int stage, char *data, int len,QString file,QString s
 			name = (char *)malloc(len+1);
 			memcpy(name, data, len);
 			name[len] = '\0';
-			//qDebug(QString("MPAK:%1").arg(rname).toAscii());
+			qDebug(QString("MPAK:%1").arg(rname).toAscii());
 			return;
 		case 1:
-/*			for ( i=0;i < len ; i+= 0x11c)
-			{
-				memcpy(test,data+i,0x11c);
-				printf("%s\n",test);
-			}*/
 			dir = (char *)realloc(dir, dirlen + len);
 			memcpy(dir + dirlen, data, len);
 			dirlen += len;
@@ -254,13 +254,23 @@ void qtheight::processData(int stage, char *data, int len,QString file,QString s
 
 				
 				rpath=QString("%1/%2").arg(save_path).arg(rdir.toLower());
+				qDebug(rpath.toAscii());
 				
 				QString lpath=save_path;
 				
 				if ( rdir.toLower() == file )
 				{
-					mkdir(lpath.toAscii(),0700);
-					if (!(lastfile = fopen(rpath.toAscii(), "w")))
+#if _WIN32 || _WIN64
+					if ( ! mkdir(lpath.toAscii()) )
+#else
+					if ( ! mkdir(lpath.toAscii(),0700) )
+#endif
+					{
+						perror(lpath.toAscii());
+						exit(1);
+					}
+					
+					if (!(lastfile = fopen(rpath.toAscii(), "wb")))
 					{
 						perror(rpath.toAscii());
 						exit(1);
