@@ -9,10 +9,13 @@
 #include <QSettings>
 #include <QTextStream>
 #include <QMessageBox>
+#include <QtGlobal>
+#include <wand/MagickWand.h>
 
 using namespace std;
 
 #include "ui_main_window.h"
+#include "qt_dempak.h"
 
 class main_window : public QMainWindow
 {
@@ -23,6 +26,16 @@ public:
     ~main_window();
 private:
     Ui::MainWindow ui;
-	qtheight *qh;
+	void build_zone(QString);
+	void write_height(QString);
+	void build_height(void);
+	MagickWand *out_img;
+	MagickWand *terrain_img;
+	MagickWand *offset_img;
+		
+private slots:	    
+	void open_filedialog_daoc(void);
+	void open_filedialog_build(void);
+	void run_build(void);
 };
 #endif // MAIN_WINDOW_H

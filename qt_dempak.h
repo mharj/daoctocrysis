@@ -5,6 +5,7 @@
 #include <QStringList>
 #include <QMap>
 #include <QFile>
+#include <QDir>
 #include <zlib.h>
 
 class qt_dempak : public QObject

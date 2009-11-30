@@ -68,6 +68,10 @@ bool qt_dempak::init(QString file)
 
 bool qt_dempak::extract(QString path,QString filename)
 {
+	QDir check_path(path);
+	if ( ! check_path.exists() )
+		check_path.mkpath(path);
+
 	if ( file_data.contains(filename) )
 	{
 		QFile file(QString("%1/%2").arg(path).arg(filename));

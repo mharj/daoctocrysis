@@ -17,7 +17,6 @@
 #include <QTextStream>
 #include <wand/MagickWand.h>
 
-#include "qtmpak.h"
 #include "qt_dempak.h"
 
 using namespace std;
