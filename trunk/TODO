@@ -6,8 +6,15 @@ INI reader
 QSettings settings("zones.dat", QSettings::IniFormat);
 settings.value("zone000/region_offset_x");
 settings.value("zone000/region_offset_y");
-// ehkä
+// maybe also
 settings.value("zone000/width");
 settings.value("zone000/height");
 settings.value("zone000/name");
 settings.value("zone000/proxy_zone");
+
+// fix mkdir
+#if _WIN32 || _WIN64
+					if ( ! mkdir(lpath.toAscii()) )
+#else
+					if ( ! mkdir(lpath.toAscii(),0700) )
+#endif
