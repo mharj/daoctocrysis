@@ -19,6 +19,12 @@ settings.value("zone000/proxy_zone");
 #endif
 
 // DOM write
+Vegetation -> VegetationObject -> Instances -> Instance
+
+	<VegetationObject Size="0.2" SizeVar="0" RandomRotation="1" AlignToTerrain="0" UseTerrainColor="0" Bending="1" Hideable="0" GrowOnVoxles="0" Pickable="0" AIRadius="-1" Brightness="1" Density="1" ElevationMin="16" ElevationMax="4096" SlopeMin="0" SlopeMax="255" CastShadow="1" RecvShadow="1" AlphaBlend="0" SpriteDistRatio="1" MaxViewDistRatio="1" Material="" UseSprites="1" MinSpec="0" Frozen="0" Layer_Wet="0" Id="2" FileName="objects/natural/trees/exodus pines/pine_a.cgf" Hidden="0" Index="0" Category="Pine">
+
+	<Instance Pos="440,808,54.778308" Scale="0.949333" Rotate="0.8703556959399,0,0,0.49242356010347"/>
+//
  QDomDocument doc("MyML");
  QDomElement root = doc.createElement("MyML");
  doc.appendChild(root);
@@ -29,5 +35,27 @@ settings.value("zone000/proxy_zone");
  QDomText t = doc.createTextNode("Hello World");
  tag.appendChild(t);
 
- QString xml = doc.toString();
+ QString xml = doc.toString(); // toByteArray
 
+
+// math
+double deg2rad (double d) 
+{
+	return d * M_PI / 180;
+}
+double rad2deg (double r) 
+{
+	return r * 180/ M_PI;
+}
+
+
+qWarning() << tr("Could not get 3ds data");
+
+QMessageBox::information( 0, tr("title"), tr("text") );
+critical
+information
+question
+warning
+
+perään
+http://doc.trolltech.com/4.5/qmessagebox.html#StandardButton-enum
