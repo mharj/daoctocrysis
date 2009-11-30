@@ -17,3 +17,17 @@ settings.value("zone000/proxy_zone");
 #else
 					if ( ! mkdir(lpath.toAscii(),0700) )
 #endif
+
+// DOM write
+ QDomDocument doc("MyML");
+ QDomElement root = doc.createElement("MyML");
+ doc.appendChild(root);
+
+ QDomElement tag = doc.createElement("Greeting");
+ root.appendChild(tag);
+
+ QDomText t = doc.createTextNode("Hello World");
+ tag.appendChild(t);
+
+ QString xml = doc.toString();
+
