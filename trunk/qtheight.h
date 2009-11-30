@@ -18,6 +18,7 @@
 #include <wand/MagickWand.h>
 
 #include "qtmpak.h"
+#include "qt_dempak.h"
 
 using namespace std;
 
@@ -34,7 +35,6 @@ public:
 private:
 	void write_height(QString);
 	bool extract_mpak(QString,QString,QString);
-	void processData(int, char *, int,QString,QString);
 	bool build_zone(QString);
 	MagickWand *out_img;
 	MagickWand *terrain_img;
