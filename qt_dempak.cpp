@@ -78,7 +78,7 @@ bool qt_dempak::extract(QString path,QString filename)
 		if (! file.open(QIODevice::WriteOnly | QIODevice::Truncate) )
 		{
 			errorString=QString("Can't open file %1 to writing").arg(filename);
-         	return(false);
+			return(false);
 		}
 		file.write(file_data[filename]);
 		file.close();
