@@ -2,21 +2,10 @@ conversion table
 http://spreadsheets.google.com/feeds/cells/t5yAwMKLrVvXg7TgZoBH9nA/1/public/basic
 
 INI reader
-QSettings settings("zones.dat", QSettings::IniFormat);
-settings.value("zone000/region_offset_x");
-settings.value("zone000/region_offset_y");
-// maybe also
 settings.value("zone000/width");
 settings.value("zone000/height");
 settings.value("zone000/name");
 settings.value("zone000/proxy_zone");
-
-// fix mkdir
-#if _WIN32 || _WIN64
-					if ( ! mkdir(lpath.toAscii()) )
-#else
-					if ( ! mkdir(lpath.toAscii(),0700) )
-#endif
 
 // DOM write
 Vegetation -> VegetationObject -> Instances -> Instance
@@ -47,15 +36,3 @@ double rad2deg (double r)
 {
 	return r * 180/ M_PI;
 }
-
-
-qWarning() << tr("Could not get 3ds data");
-
-QMessageBox::information( 0, tr("title"), tr("text") );
-critical
-information
-question
-warning
-
-perään
-http://doc.trolltech.com/4.5/qmessagebox.html#StandardButton-enum
