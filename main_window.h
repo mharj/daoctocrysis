@@ -19,20 +19,20 @@ using namespace std;
 
 class main_window : public QMainWindow
 {
-    Q_OBJECT
+	Q_OBJECT
 
 public:
-    main_window(QWidget *parent = 0);
-    ~main_window();
+	main_window(QWidget *parent = 0);
+	~main_window();
 private:
-    Ui::MainWindow ui;
+	Ui::MainWindow ui;
 	void build_zone(QString);
 	void write_height(QString);
 	void build_height(void);
 	MagickWand *out_img;
 	MagickWand *terrain_img;
 	MagickWand *offset_img;
-		
+	
 private slots:	    
 	void open_filedialog_daoc(void);
 	void open_filedialog_build(void);

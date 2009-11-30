@@ -75,7 +75,7 @@ bool qt_dempak::extract(QString path,QString filename)
 	if ( file_data.contains(filename) )
 	{
 		QFile file(QString("%1/%2").arg(path).arg(filename));
-     	if (! file.open(QIODevice::WriteOnly | QIODevice::Truncate) )
+		if (! file.open(QIODevice::WriteOnly | QIODevice::Truncate) )
 		{
 			errorString=QString("Can't open file %1 to writing").arg(filename);
          	return(false);
