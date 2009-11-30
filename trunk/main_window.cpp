@@ -113,12 +113,49 @@ void main_window::build_height(void)
 			QMessageBox::critical( 0, tr("Error"), dem_files.errorString );
 			return;
 		}
-
-		build_zone(id);
-
+		// model and location data
+		if (! dem_files.extract( QString("%1/zone%2").arg( ui.builddir->text() ).arg( id ),"nifs.csv") )
+		{
+			QMessageBox::critical( 0, tr("Error"), dem_files.errorString );
+			return;
+		}
+		if (! dem_files.extract( QString("%1/zone%2").arg( ui.builddir->text() ).arg( id ),"fixtures.csv") )
+		{
+			QMessageBox::critical( 0, tr("Error"), dem_files.errorString );
+			return;
+		}
 		
+		load_nif_list(id);		
+		
+		build_zone(id);
 	}
-//	write_height(QString("%1/alb.bmp").arg(ui.builddir->text()));	
+/*	for (int i=0;i < nif_name.count(); i++ )
+	{
+		if ( ! nif_name.at(i).isEmpty() )
+			qDebug(nif_name.at(i).toAscii());
+	}*/
+}
+
+void main_window::load_nif_list (QString id)
+{
+	QFile file(QString("%1/zone%2/nifs.csv").arg( ui.builddir->text() ).arg( id ));
+	if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
+		return;
+
+	while (!file.atEnd()) 
+	{
+		QString line(file.readLine());
+		QStringList list = line.split(",");
+		bool ok;
+		int nif_id = list.at(0).toInt(&ok, 10 );
+		// nif is numeric
+		if ( ok ) 
+		{
+			nif_filenames.insert(nif_id,list.at(2).toLower());
+			nif_name.insert(nif_id,list.at(1));
+		}
+
+	}	
 }
 
 void main_window::build_zone(QString id)
