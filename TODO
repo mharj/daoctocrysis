@@ -1,0 +1,13 @@
+conversion table
+http://spreadsheets.google.com/feeds/cells/t5yAwMKLrVvXg7TgZoBH9nA/1/public/basic
+
+
+INI reader
+QSettings settings("zones.dat", QSettings::IniFormat);
+settings.value("zone000/region_offset_x");
+settings.value("zone000/region_offset_y");
+// ehkä
+settings.value("zone000/width");
+settings.value("zone000/height");
+settings.value("zone000/name");
+settings.value("zone000/proxy_zone");
