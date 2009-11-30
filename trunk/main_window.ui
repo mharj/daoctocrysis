@@ -111,12 +111,12 @@
     <property name="title">
      <string>Buildlog</string>
     </property>
-    <widget class="QListView" name="logview">
+    <widget class="QTextEdit" name="logview">
      <property name="geometry">
       <rect>
-       <x>10</x>
+       <x>15</x>
        <y>20</y>
-       <width>461</width>
+       <width>456</width>
        <height>256</height>
       </rect>
      </property>
