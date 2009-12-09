@@ -28,13 +28,19 @@ private:
 	Ui::MainWindow ui;
 	void build_zone(QString);
 	void load_nif_list(QString);
+	void add_nifs_to_xml(QString);
 	void write_height(QString);
 	void build_height(void);
 	MagickWand *out_img;
 	MagickWand *terrain_img;
 	MagickWand *offset_img;
+	QDomDocument domDocument;
+	QDomElement root;
+	QDomElement Vegetation;
+	QDomElement VegetationObject;
 	QList<QString> nif_filenames;
 	QList<QString> nif_name;
+	QMap<int,QDomElement> fixture_element;
 
 private slots:	    
 	void open_filedialog_daoc(void);
