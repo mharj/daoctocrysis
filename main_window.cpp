@@ -28,6 +28,11 @@ main_window::main_window(QWidget *parent)
 	connect(ui.daocdir_button,SIGNAL( clicked() ),this,SLOT( open_filedialog_daoc() ) );
 	connect(ui.builddir_button,SIGNAL( clicked() ),this,SLOT( open_filedialog_build() ) );
 	connect(ui.startbutton,SIGNAL( clicked() ),this,SLOT( run_build() ) );
+	
+	QDomDocument domDocument("");
+	QDomElement Vegetation = domDocument.createElement("Vegetation");
+	domDocument.appendChild(Vegetation);
+	
 }
 
 /*
@@ -125,7 +130,9 @@ void main_window::build_height(void)
 			return;
 		}
 		
-		load_nif_list(id);		
+		load_nif_list(id);
+
+		add_nifs_to_xml(id);
 		
 		build_zone(id);
 	}
@@ -151,15 +158,79 @@ void main_window::load_nif_list (QString id)
 		// nif is numeric
 		if ( ok ) 
 		{
+		
 			nif_filenames.insert(nif_id,list.at(2).toLower());
 			nif_name.insert(nif_id,list.at(1));
 		}
 
-	}	
+	}
+	file.close();
+}
+
+void main_window::add_nifs_to_xml (QString id )
+{
+	qDebug("main_window::add_nifs_to_xml");
+	QFile file(QString("%1/zone%2/fixtures.csv").arg( ui.builddir->text() ).arg( id ));
+	if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
+		return;
+
+	while (!file.atEnd()) 
+	{
+		QString line(file.readLine());
+		QStringList list = line.split(",");
+		bool ok;
+		int nif_id = list.at(1).toInt(&ok, 10 );
+		// nif is numeric
+		if ( ok ) 
+		{
+			qDebug("main_window::add_nifs_to_xml - loop");
+//			ui.logview->append( list.at(2) );
+			if ( fixture_element[nif_id].isNull() )
+			{
+				qDebug("main_window::add_nifs_to_xml - current null");
+				//ui.logview->append( list.at(2) );
+				VegetationObject = domDocument.createElement("VegetationObject");
+				Vegetation.appendChild(VegetationObject);
+				//qDebug("main_window::add_nifs_to_xml - current null 2");
+//			QDomElement fixture_element[nif_id] = domDocument.createElement("Instances");
+				fixture_element[nif_id] = domDocument.createElement("Instances");
+				VegetationObject.appendChild(fixture_element[nif_id]);
+//				fixture_element.insert(nif_id,Instances);
+			}
+//			qDebug("main_window::add_nifs_to_xml - done");
+			QDomElement Instance = domDocument.createElement("Instance");
+			Instance.setAttribute("Pos", "3200,3188,12.908286");
+			Instance.setAttribute("Scale","0.2");
+			Instance.setAttribute("Rotate","0.275637355817,0,0,-0.96126169593832");
+			fixture_element[nif_id].appendChild(Instance);			
+/*			
+			QDomElement test = domDocument.documentElement();
+			QDomElement SubMaterials = test.firstChildElement("SubMaterials");
+	*/		
+//			nif_filenames.insert(nif_id,list.at(2).toLower());
+//			nif_name.insert(nif_id,list.at(1));
+		}
+
+	}
+	file.close();
+			
+	// save new file			
+	// korjaa tämä lopuksi <- <- <-
+	QFile nfile("c:/temp/test.xml");			
+	if (!nfile.open(QIODevice::WriteOnly | QIODevice::Text))
+	{
+		QMessageBox::critical(this, "Error",QString("Error open (write) file"), QMessageBox::Ok , QMessageBox::Ok);
+		return;
+	}
+	QTextStream nout(&nfile);
+	nout <<	domDocument.toString();
+	nfile.close();	
+//	QMessageBox::critical(this, "Error",domDocument.toString(), QMessageBox::Ok , QMessageBox::Ok);
 }
 
 void main_window::build_zone(QString id)
 {
+	qDebug("main_window::build_zone");
 	int status;	
 	int tex_depth=0;
 	int off_depth=0;
