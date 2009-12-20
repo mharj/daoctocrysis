@@ -15,23 +15,25 @@ main_window::main_window(QWidget *parent)
 
 	// init global image
 	MagickWandGenesis();
+/*
 	PixelWand *color;
 	color=NewPixelWand();
 	this->out_img=NewMagickWand();
 	PixelSetBlack(color,(1.0f-1.0f));
+	
 	MagickNewImage(this->out_img,2048,2048,color);
 	MagickSetImageColorspace(this->out_img,GRAYColorspace);
 	MagickSetImageType(this->out_img,GrayscaleType);
 	MagickSetImageFormat(this->out_img, "BMP" );
-	MagickSetImageDepth(this->out_img, 16 );
+	MagickSetImageDepth(this->out_img, 16 );*/
 	
 	connect(ui.daocdir_button,SIGNAL( clicked() ),this,SLOT( open_filedialog_daoc() ) );
 	connect(ui.builddir_button,SIGNAL( clicked() ),this,SLOT( open_filedialog_build() ) );
 	connect(ui.startbutton,SIGNAL( clicked() ),this,SLOT( run_build() ) );
 	
-	QDomDocument domDocument("");
-	QDomElement Vegetation = domDocument.createElement("Vegetation");
+	Vegetation = domDocument.createElement("Vegetation");
 	domDocument.appendChild(Vegetation);
+	
 	
 }
 
@@ -65,21 +67,113 @@ void main_window::open_filedialog_build()
 
 void main_window::run_build()
 {
+	QString build_area=QString(ui.map_select->currentText().toLower());
 
-
-	build_height();
-	write_height(QString("%1/alb.bmp").arg(ui.builddir->text()));	
+	build_height(build_area);
+	write_height(QString("%1/%2.bmp").arg(ui.builddir->text()).arg(build_area) );	
 }
 
-void main_window::build_height(void)
+void main_window::read_tree_conversion(QString fileName)
+{
+	QString errorStr;
+	int errorLine;
+	int errorColumn;
+	QString xml_data;
+	QDomDocument domDocument;
+
+	QString group_name;
+	QString nif_key_name;
+	QString cgf_name;
+	QString snow;
+	QString scale;
+	
+	// read xml
+	QFile file(fileName);
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
+	{
+		QMessageBox::critical(this, "Error",QString("Error reading file %1").arg(fileName), QMessageBox::Ok , QMessageBox::Ok);
+		return;
+	}
+	
+	while (!file.atEnd()) 
+	{
+		QByteArray line = file.readLine();
+		xml_data.append(line);
+	}
+	file.close();	
+	// DOM
+	if (!domDocument.setContent(xml_data, true, &errorStr, &errorLine, &errorColumn)) 
+	{
+		QMessageBox::critical(this, "Error",QString("Error reading XML data"), QMessageBox::Ok , QMessageBox::Ok);
+	}else{
+		QDomElement root = domDocument.documentElement();
+		QDomNodeList entries=root.elementsByTagName("entry");
+		for(int i=0;i<entries.count();i++)
+		{
+			QDomElement e = entries.item(i).toElement();
+			QDomElement cell = e.elementsByTagName("cell").item(0).toElement();
+			QString value = e.elementsByTagName("content").item(0).toElement().text();
+			if (! cell.isNull() )
+			{
+				int row=cell.attribute("row").toInt();
+				int col=cell.attribute("col").toInt();
+				if ( col == 1 && row > 1 )
+					group_name=value;
+				if ( col == 2 && row > 1 )
+					nif_key_name=value.toLower();
+				if ( col == 3 && row > 1 )
+					cgf_name=value;
+				if ( col == 4 && row > 1 )
+					scale=value;
+				if ( col == 5 && row > 1 )
+				{
+					snow=value;
+					nif_group[nif_key_name]=group_name;
+					nif_cgf[nif_key_name]=cgf_name;
+					nif_cgf_scale[nif_key_name]=scale.toDouble();
+					if ( snow.toLower() == "false" )
+						nif_snow[nif_key_name]=false;
+					else
+						nif_snow[nif_key_name]=true;
+				}
+			}
+			
+		}
+		
+	}
+}
+
+void main_window::build_height(QString subname)
 {
 	qt_dempak zones_mpk;
-	QList<int> alb_zones;
+	QList<int> conv_zones;
 	
-	alb_zones << 0 << 1 << 2 << 3 << 4 << 6 << 7 << 8 << 9 << 10 << 11 << 12 << 14 << 15;
+	region_offset_x.clear();
+	region_offset_y.clear();
+	scalefactor.clear();
+	offsetfactor.clear();
+	fixture_element.clear();
+	nif_filenames.clear();
+	nif_name.clear();
+	
+	// load conversion xml
+	read_tree_conversion("veg.xml");	
+	if ( subname == "albion" )
+		conv_zones <<   0<<  1<<  2<<  3<<  4<<  6<<  7<<  8<<  9<< 10<< 11<< 12<< 14<< 15;
+	if ( subname == "midgard" )
+		conv_zones << 100<<101<<102<<103<<104<<105<<106<<107<<108<<116<<111<<112<<113<<115;
+	if ( subname == "hibernia" )
+		conv_zones << 200<<201<<202<<203<<204<<205<<206<<207<<208<<216<<210<<211<<212<<214;
+	if ( subname == "thidranki" )
+		conv_zones << 250;
+	if ( subname == "new frontier" )
+		conv_zones << 163<<164<<167<<168<<169<<170<<171<<172<<173<<174<<175<<176<<177<<178;
+	if ( subname == "toa" )
+		conv_zones << 73<<74<<75<<76<<77<<81<<82<<84<<85<<86<<87<<71;
 
 	ui.logview->append(QString("extracting zone structure"));
-	if ( ! zones_mpk.init( QString("%1/zones.mpk").arg(ui.daocdir->text()) ) )
+	ui.logview->repaint();
+	if ( ! zones_mpk.init( QString("%1/zones/zones.mpk").arg(ui.daocdir->text()) ) )
 	{
 		QMessageBox::critical( 0, tr("Error"), zones_mpk.errorString );
 		return;
@@ -90,19 +184,28 @@ void main_window::build_height(void)
 		QMessageBox::critical( 0, tr("Error"), zones_mpk.errorString );
 		return;
 	}
-	for (int i = 0; i < alb_zones.size(); ++i) 
+	for (int i = 0; i < conv_zones.size(); ++i) 
 	{
 		qt_dempak dem_files;
 	
-		QString id=QString("%L1").arg(alb_zones.at(i),3,10,QChar('0'));
+		QString id=QString("%L1").arg(conv_zones.at(i),3,10,QChar('0'));
 		
-		ui.logview->append(QString("adding zone%1").arg(id));
+		ui.logview->append(QString("extracting zone%1").arg(id));
+		ui.logview->repaint();
+		// check if zones or frontier/zones
+		QString main_zone = QString("%1/zones/zone%2/dat%2.mpk").arg(ui.daocdir->text()).arg(id);
+		QString frontier_zone = QString("%1/frontiers/zones/zone%2/dat%2.mpk").arg(ui.daocdir->text()).arg(id);
 		
-		if  (! dem_files.init( QString("%1/zone%2/dat%2.mpk").arg(ui.daocdir->text()).arg(id) ) )
+		if  (! dem_files.init( main_zone ) )
 		{
-			QMessageBox::critical( 0, tr("Error"), dem_files.errorString );
-			return;
-		}	
+			if ( !  dem_files.init( frontier_zone ) )
+			{
+				QMessageBox::critical( 0, tr("Error"), dem_files.errorString );
+				return;
+			}
+		}
+
+		
 		if (! dem_files.extract( QString("%1/zone%2").arg( ui.builddir->text() ).arg( id ),"terrain.pcx") )
 		{
 			QMessageBox::critical( 0, tr("Error"), dem_files.errorString );
@@ -129,18 +232,69 @@ void main_window::build_height(void)
 			QMessageBox::critical( 0, tr("Error"), dem_files.errorString );
 			return;
 		}
-		
-		load_nif_list(id);
+		read_zone_offsets(id);
+	}
 
-		add_nifs_to_xml(id);
+	// calc zone offset
+	calc_total_zone();
+	// make image
+	PixelWand *color;
+	color=NewPixelWand();
+	this->out_img=NewMagickWand();
+	PixelSetBlack(color,(1.0f-1.0f));	
+	MagickNewImage(this->out_img,image_size,image_size,color);
+	MagickSetImageColorspace(this->out_img,GRAYColorspace);
+	MagickSetImageType(this->out_img,GrayscaleType);
+	MagickSetImageFormat(this->out_img, "BMP" );
+	MagickSetImageDepth(this->out_img, 16 );
+	
+	for (int i = 0; i < conv_zones.size(); ++i) 
+	{
+		QString id=QString("%L1").arg(conv_zones.at(i),3,10,QChar('0'));
+		load_nif_list(id);
 		
 		build_zone(id);
+
+		add_nifs_to_xml(id);
 	}
-/*	for (int i=0;i < nif_name.count(); i++ )
+	save_xml( QString("%1/%2.veg").arg( ui.builddir->text() ).arg(subname) );
+}
+
+void main_window::calc_total_zone(void)
+{
+	int high_x=0;
+	int high_y=0;
+	low_x=-1;
+	low_y=-1;	
+	ui.logview->append(QString("scanning region offsets"));
+	ui.logview->repaint();
+	QList<int> keys = scalefactor.keys();
+	for (int i = 0; i < keys.size(); ++i)
 	{
-		if ( ! nif_name.at(i).isEmpty() )
-			qDebug(nif_name.at(i).toAscii());
-	}*/
+		if ( low_x == -1 || low_x > region_offset_x[keys[i]] )
+			low_x=region_offset_x[keys[i]];
+		if ( low_y == -1 || low_y > region_offset_y[keys[i]] )
+			low_y=region_offset_y[keys[i]];
+		
+		if ( high_x < region_offset_x[keys[i]] )
+			high_x=region_offset_x[keys[i]];
+		if ( high_y < region_offset_y[keys[i]] )
+			high_y=region_offset_y[keys[i]];	
+	}
+	low_x*=32;
+	low_y*=32;
+	high_x*=32;
+	high_y*=32;
+
+	int comb_x=high_x-low_x;
+	int comb_y=high_y-low_y;
+	image_size=256;
+	for (int i=1;i<10;i++)
+	{	
+		if ( comb_x < image_size && comb_y < image_size )
+			break;
+		image_size+=image_size;
+	}
 }
 
 void main_window::load_nif_list (QString id)
@@ -155,21 +309,18 @@ void main_window::load_nif_list (QString id)
 		QStringList list = line.split(",");
 		bool ok;
 		int nif_id = list.at(0).toInt(&ok, 10 );
-		// nif is numeric
-		if ( ok ) 
+		if ( ok ) // nif_id is numeric
 		{
-		
-			nif_filenames.insert(nif_id,list.at(2).toLower());
-			nif_name.insert(nif_id,list.at(1));
+			nif_filenames[nif_id]=list.at(2).toLower();
+			nif_name[nif_id]=list.at(1);
 		}
-
 	}
 	file.close();
+
 }
 
 void main_window::add_nifs_to_xml (QString id )
 {
-	qDebug("main_window::add_nifs_to_xml");
 	QFile file(QString("%1/zone%2/fixtures.csv").arg( ui.builddir->text() ).arg( id ));
 	if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
 		return;
@@ -180,57 +331,74 @@ void main_window::add_nifs_to_xml (QString id )
 		QStringList list = line.split(",");
 		bool ok;
 		int nif_id = list.at(1).toInt(&ok, 10 );
-		// nif is numeric
-		if ( ok ) 
+		QString nif_name_id=nif_filenames.value(nif_id,QString("NULL"));
+		if ( ok && ! nif_group[nif_name_id].isNull() )  		
 		{
-			qDebug("main_window::add_nifs_to_xml - loop");
-//			ui.logview->append( list.at(2) );
-			if ( fixture_element[nif_id].isNull() )
+			if ( fixture_element[nif_name_id].isNull() )
 			{
-				qDebug("main_window::add_nifs_to_xml - current null");
-				//ui.logview->append( list.at(2) );
 				VegetationObject = domDocument.createElement("VegetationObject");
+				VegetationObject.setAttribute("FileName",nif_cgf[nif_name_id] );
+//				VegetationObject.setAttribute("Category",QString("%1").arg( nif_group[nif_name_id] ) );
+				VegetationObject.setAttribute("Category",QString("%1").arg( nif_name[nif_id] ) );
+				VegetationObject.setAttribute("CastShadow","1");
+				VegetationObject.setAttribute("RecvShadow","1");
+				if ( nif_snow[nif_name_id] )
+					VegetationObject.setAttribute("Frozen","1");
+				else
+					VegetationObject.setAttribute("Frozen","0");
+				
+				VegetationObject.setAttribute("nif_id",QString("%1").arg( nif_id ) );
+				VegetationObject.setAttribute("nif_file",QString("%1").arg( nif_filenames.value(nif_id,QString("NULL")) ) );
 				Vegetation.appendChild(VegetationObject);
-				//qDebug("main_window::add_nifs_to_xml - current null 2");
-//			QDomElement fixture_element[nif_id] = domDocument.createElement("Instances");
-				fixture_element[nif_id] = domDocument.createElement("Instances");
-				VegetationObject.appendChild(fixture_element[nif_id]);
-//				fixture_element.insert(nif_id,Instances);
+				fixture_element[nif_name_id] = domDocument.createElement("Instances");
+				VegetationObject.appendChild(fixture_element[nif_name_id]);
 			}
-//			qDebug("main_window::add_nifs_to_xml - done");
 			QDomElement Instance = domDocument.createElement("Instance");
-			Instance.setAttribute("Pos", "3200,3188,12.908286");
-			Instance.setAttribute("Scale","0.2");
-			Instance.setAttribute("Rotate","0.275637355817,0,0,-0.96126169593832");
-			fixture_element[nif_id].appendChild(Instance);			
-/*			
-			QDomElement test = domDocument.documentElement();
-			QDomElement SubMaterials = test.firstChildElement("SubMaterials");
-	*/		
-//			nif_filenames.insert(nif_id,list.at(2).toLower());
-//			nif_name.insert(nif_id,list.at(1));
-		}
+//			ID,NIF #,Textual Name,X,Y,Z,A,Scale
 
+			double x = (list.at(3).toDouble()/65536*1024)+(((region_offset_x[id.toInt()]*32)-low_x)*4);
+			double y = (list.at(4).toDouble()/65536*1024)+(((region_offset_y[id.toInt()]*32)-low_y)*4);
+
+			double z = list.at(5).toDouble()/64;
+			double s = (list.at(7).toDouble()/100)/nif_cgf_scale[nif_name_id]/2;
+			Instance.setAttribute("Pos", QString("%1,%2,%3").arg(y,0,'f',3).arg(x,0,'f',3).arg(z,0,'f',3) );
+			Instance.setAttribute("Scale",QString("%1").arg(s,0,'f',3) );
+			fixture_element[nif_name_id].appendChild(Instance);			
+		}
 	}
 	file.close();
-			
-	// save new file			
-	// korjaa tämä lopuksi <- <- <-
-	QFile nfile("c:/temp/test.xml");			
+}
+void main_window::save_xml(QString file)
+{
+	QFile nfile(file);			
 	if (!nfile.open(QIODevice::WriteOnly | QIODevice::Text))
 	{
 		QMessageBox::critical(this, "Error",QString("Error open (write) file"), QMessageBox::Ok , QMessageBox::Ok);
 		return;
 	}
-	QTextStream nout(&nfile);
-	nout <<	domDocument.toString();
-	nfile.close();	
-//	QMessageBox::critical(this, "Error",domDocument.toString(), QMessageBox::Ok , QMessageBox::Ok);
+	nfile.write(domDocument.toByteArray());
+	nfile.close();
+	ui.logview->append(QString("saved vegetary layer %1").arg(file));
+	ui.logview->repaint();
+}
+
+void main_window::read_zone_offsets(QString id)
+{
+	// defined structure files
+	QString zones_dat=QString("%1/zones.dat").arg(ui.builddir->text());
+	QString onezone_dat=QString("%1/zone%2/sector.dat").arg(ui.builddir->text()).arg(id);	
+	QSettings gsettings(zones_dat, QSettings::IniFormat);
+	QSettings lsettings(onezone_dat, QSettings::IniFormat);
+	
+	// get structure data from files
+	scalefactor[id.toInt()]=lsettings.value(QString("terrain/scalefactor"),0).toInt();
+	offsetfactor[id.toInt()]=lsettings.value(QString("terrain/offsetfactor"),0).toInt();
+	region_offset_x[id.toInt()]=gsettings.value(QString("zone%1/region_offset_x").arg(id),0).toInt();
+	region_offset_y[id.toInt()]=gsettings.value(QString("zone%1/region_offset_y").arg(id),0).toInt();
 }
 
 void main_window::build_zone(QString id)
 {
-	qDebug("main_window::build_zone");
 	int status;	
 	int tex_depth=0;
 	int off_depth=0;
@@ -239,19 +407,8 @@ void main_window::build_zone(QString id)
 	int height=0;
 	pixel_array = new float[1];
 	ipixel_array = new int[256];
-	
-	// defined structure files
-	QString zones_dat=QString("%1/zones.dat").arg(ui.builddir->text());
-	QString onezone_dat=QString("%1/zone%2/sector.dat").arg(ui.builddir->text()).arg(id);	
-	QSettings gsettings(zones_dat, QSettings::IniFormat);
-	QSettings lsettings(onezone_dat, QSettings::IniFormat);
-	
-	// get structure data from files
-	int scalefactor=lsettings.value(QString("terrain/scalefactor"),0).toInt();
-	int offsetfactor=lsettings.value(QString("terrain/offsetfactor"),0).toInt();
-	int region_offset_x=gsettings.value(QString("zone%1/region_offset_x").arg(id),0).toInt();
-	int region_offset_y=gsettings.value(QString("zone%1/region_offset_y").arg(id),0).toInt();
-
+	ui.logview->append(QString("building heightmap"));
+	ui.logview->repaint();
 	// terrain 
 	this->terrain_img=NewMagickWand();
 	status=MagickReadImage(this->terrain_img,QString("%1/zone%2/terrain.pcx").arg(ui.builddir->text()).arg(id).toAscii());
@@ -277,10 +434,10 @@ void main_window::build_zone(QString id)
 			tex_depth=(int)(pixel_array[0]*256);
 			MagickGetImagePixels(this->offset_img, x, y, 1, 1, "I", FloatPixel, pixel_array);
 			off_depth=(int)(pixel_array[0]*256);
-			height=(tex_depth*scalefactor) + (off_depth*offsetfactor);
+			height=(tex_depth*scalefactor[id.toInt()]) + (off_depth*offsetfactor[id.toInt()]);
 			height*=4;
 			ipixel_array[0]=height;
-			MagickSetImagePixels(this->out_img,(region_offset_x*32)+x-1024,(region_offset_y*32)+y-1024,1,1,"I", ShortPixel,ipixel_array );
+			MagickSetImagePixels(this->out_img,(region_offset_x[id.toInt()]*32)+x-low_x,(region_offset_y[id.toInt()]*32)+y-low_y,1,1,"I", ShortPixel,ipixel_array );
 		}
 	}
 }
@@ -288,6 +445,6 @@ void main_window::build_zone(QString id)
 void main_window::write_height(QString file)
 {
 	ui.logview->append(QString("write %1").arg(file));
-//	qDebug(QString("write: %1").arg(file).toAscii());
+	ui.logview->repaint();
 	MagickWriteImage(this->out_img,file.toAscii());
 }
