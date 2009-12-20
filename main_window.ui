@@ -1,21 +1,28 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<ui version="4.0">
+<ui version="4.0" >
  <class>MainWindow</class>
- <widget class="QMainWindow" name="MainWindow">
-  <property name="geometry">
+ <widget class="QMainWindow" name="MainWindow" >
+  <property name="geometry" >
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>492</width>
-    <height>448</height>
+    <width>496</width>
+    <height>510</height>
    </rect>
   </property>
-  <property name="windowTitle">
-   <string>MainWindow</string>
+  <property name="windowTitle" >
+   <string>DAoC to Crysis conversion tool</string>
   </property>
-  <widget class="QWidget" name="centralwidget">
-   <widget class="QGroupBox" name="groupBox">
-    <property name="geometry">
+  <widget class="QWidget" name="centralwidget" >
+   <property name="geometry" >
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>496</width>
+     <height>491</height>
+    </rect>
+   </property>
+   <widget class="QGroupBox" name="groupBox" >
+    <property name="geometry" >
      <rect>
       <x>5</x>
       <y>5</y>
@@ -23,11 +30,11 @@
       <height>46</height>
      </rect>
     </property>
-    <property name="title">
+    <property name="title" >
      <string>Dark Age Of Camelot Directory:</string>
     </property>
-    <widget class="QLineEdit" name="daocdir">
-     <property name="geometry">
+    <widget class="QLineEdit" name="daocdir" >
+     <property name="geometry" >
       <rect>
        <x>10</x>
        <y>15</y>
@@ -36,8 +43,8 @@
       </rect>
      </property>
     </widget>
-    <widget class="QPushButton" name="daocdir_button">
-     <property name="geometry">
+    <widget class="QPushButton" name="daocdir_button" >
+     <property name="geometry" >
       <rect>
        <x>380</x>
        <y>15</y>
@@ -45,13 +52,13 @@
        <height>23</height>
       </rect>
      </property>
-     <property name="text">
+     <property name="text" >
       <string>Browse</string>
      </property>
     </widget>
    </widget>
-   <widget class="QGroupBox" name="groupBox_2">
-    <property name="geometry">
+   <widget class="QGroupBox" name="groupBox_2" >
+    <property name="geometry" >
      <rect>
       <x>5</x>
       <y>50</y>
@@ -59,11 +66,11 @@
       <height>46</height>
      </rect>
     </property>
-    <property name="title">
+    <property name="title" >
      <string>Build Directory</string>
     </property>
-    <widget class="QLineEdit" name="builddir">
-     <property name="geometry">
+    <widget class="QLineEdit" name="builddir" >
+     <property name="geometry" >
       <rect>
        <x>10</x>
        <y>15</y>
@@ -72,8 +79,8 @@
       </rect>
      </property>
     </widget>
-    <widget class="QPushButton" name="builddir_button">
-     <property name="geometry">
+    <widget class="QPushButton" name="builddir_button" >
+     <property name="geometry" >
       <rect>
        <x>380</x>
        <y>15</y>
@@ -81,40 +88,40 @@
        <height>23</height>
       </rect>
      </property>
-     <property name="text">
+     <property name="text" >
       <string>Browse</string>
      </property>
     </widget>
    </widget>
-   <widget class="QPushButton" name="startbutton">
-    <property name="geometry">
+   <widget class="QPushButton" name="startbutton" >
+    <property name="geometry" >
      <rect>
-      <x>395</x>
-      <y>400</y>
+      <x>390</x>
+      <y>460</y>
       <width>89</width>
       <height>23</height>
      </rect>
     </property>
-    <property name="text">
+    <property name="text" >
      <string>Build</string>
     </property>
    </widget>
-   <widget class="QGroupBox" name="groupBox_3">
-    <property name="geometry">
+   <widget class="QGroupBox" name="groupBox_3" >
+    <property name="geometry" >
      <rect>
-      <x>5</x>
-      <y>95</y>
+      <x>10</x>
+      <y>140</y>
       <width>481</width>
       <height>286</height>
      </rect>
     </property>
-    <property name="title">
+    <property name="title" >
      <string>Buildlog</string>
     </property>
-    <widget class="QTextEdit" name="logview">
-     <property name="geometry">
+    <widget class="QTextEdit" name="logview" >
+     <property name="geometry" >
       <rect>
-       <x>15</x>
+       <x>10</x>
        <y>20</y>
        <width>456</width>
        <height>256</height>
@@ -122,8 +129,70 @@
      </property>
     </widget>
    </widget>
+   <widget class="QComboBox" name="map_select" >
+    <property name="geometry" >
+     <rect>
+      <x>373</x>
+      <y>110</y>
+      <width>101</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <item>
+     <property name="text" >
+      <string>Albion</string>
+     </property>
+    </item>
+    <item>
+     <property name="text" >
+      <string>Midgard</string>
+     </property>
+    </item>
+    <item>
+     <property name="text" >
+      <string>Hibernia</string>
+     </property>
+    </item>
+    <item>
+     <property name="text" >
+      <string>Thidranki</string>
+     </property>
+    </item>
+    <item>
+     <property name="text" >
+      <string>New Frontier</string>
+     </property>
+    </item>
+    <item>
+     <property name="text" >
+      <string>TOA</string>
+     </property>
+    </item>
+   </widget>
+   <widget class="QLabel" name="label" >
+    <property name="geometry" >
+     <rect>
+      <x>340</x>
+      <y>110</y>
+      <width>31</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="text" >
+     <string>Build:</string>
+    </property>
+   </widget>
   </widget>
-  <widget class="QStatusBar" name="statusbar"/>
+  <widget class="QStatusBar" name="statusbar" >
+   <property name="geometry" >
+    <rect>
+     <x>0</x>
+     <y>491</y>
+     <width>496</width>
+     <height>19</height>
+    </rect>
+   </property>
+  </widget>
  </widget>
  <resources/>
  <connections/>
