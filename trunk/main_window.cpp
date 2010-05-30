@@ -60,7 +60,11 @@ void main_window::run_build() {
 	domDocument.appendChild(Vegetation);
 
 	build_height(build_area);
-	write_height(QString("%1/%2.bmp").arg(ui.builddir->text()).arg(build_area) );	
+	write_height(QString("%1/%2_height.bmp").arg(ui.builddir->text()).arg(build_area) );	
+	write_lod(QString("%1/%2_texture.bmp").arg(ui.builddir->text()).arg(build_area) );
+	ui.logview->append(QString("Done!"));
+	ui.logview->append(QString("Create new level, heightmap resolution is %1x%1 , 4m per unit").arg(image_size) );
+	ui.logview->repaint();
 }
 
 void main_window::read_tree_conversion(QString fileName)
@@ -138,13 +142,20 @@ void main_window::build_height(QString subname) {
 	nif_name.clear();
 	
 	// load conversion xml
-	read_tree_conversion("veg.xml");	
+	read_tree_conversion("veg.xml");
+	
 	if ( subname == "albion" )
 		conv_zones <<   0<<  1<<  2<<  3<<  4<<  6<<  7<<  8<<  9<< 10<< 11<< 12<< 14<< 15;
+	if ( subname == "albion si" )
+		conv_zones <<  51<< 52<< 53<< 54<< 55<< 56<< 57;			
 	if ( subname == "midgard" )
 		conv_zones << 100<<101<<102<<103<<104<<105<<106<<107<<108<<116<<111<<112<<113<<115;
+	if ( subname == "midgard si" )
+		conv_zones << 151 <<152 <<153 <<154 <<155 <<156 <<158;		
 	if ( subname == "hibernia" )
 		conv_zones << 200<<201<<202<<203<<204<<205<<206<<207<<208<<216<<210<<211<<212<<214;
+	if ( subname == "hibernia si" )
+		conv_zones << 181  <<182  <<183  <<184  <<185  <<186  <<187;			
 	if ( subname == "thidranki" )
 		conv_zones << 250;
 	if ( subname == "new frontier" )
@@ -164,21 +175,37 @@ void main_window::build_height(QString subname) {
 		return;
 	}
 	
+	ui.logview->append(QString("found %1 zones").arg(conv_zones.size()));
+	ui.logview->repaint();	
+
 	for (int i = 0; i < conv_zones.size(); ++i) {
 		qt_dempak dem_files;
-	
-		QString id=QString("%L1").arg(conv_zones.at(i),3,10,QChar('0'));
+		qt_dempak lod_files;
 		
+		QString id=QString("%L1").arg(conv_zones.at(i),3,10,QChar('0'));
 		ui.logview->append(QString("extracting zone%1").arg(id));
 		ui.logview->repaint();
 		// check if zones or frontier/zones
 		QString main_zone = QString("%1/zones/zone%2/dat%2.mpk").arg(ui.daocdir->text()).arg(id);
+		QString main_lod = QString("%1/zones/zone%2/lod%2.mpk").arg(ui.daocdir->text()).arg(id);
 		QString frontier_zone = QString("%1/frontiers/zones/zone%2/dat%2.mpk").arg(ui.daocdir->text()).arg(id);
+		QString frontier_lod = QString("%1/frontiers/zones/zone%2/lod%2.mpk").arg(ui.daocdir->text()).arg(id);
 		
 		if  (! dem_files.init( main_zone ) ) {
 			if ( !  dem_files.init( frontier_zone ) ) {
 				QMessageBox::critical( 0, tr("Error"), dem_files.errorString );
 				return;
+			}else {
+				lod_files.init(frontier_lod);
+			}
+		}else {
+			lod_files.init(main_lod);
+		}
+
+		// lod textures
+		for (int x=0;x<8;x++) {
+			for ( int y=0;y<8;y++ ) {
+				lod_files.extract( QString("%1/zone%2").arg( ui.builddir->text() ).arg( id ), QString("lod0%1-0%2.dds").arg(x).arg(y) );
 			}
 		}
 
@@ -217,12 +244,19 @@ void main_window::build_height(QString subname) {
 	PixelWand *color;
 	color=NewPixelWand();
 	this->out_img=NewMagickWand();
+	this->lod_img=NewMagickWand();
 	PixelSetBlack(color,(1.0f-1.0f));	
 	MagickNewImage(this->out_img,image_size,image_size,color);
 	MagickSetImageColorspace(this->out_img,GRAYColorspace);
 	MagickSetImageType(this->out_img,GrayscaleType);
 	MagickSetImageFormat(this->out_img, "BMP" );
 	MagickSetImageDepth(this->out_img, 16 );
+
+	MagickNewImage(this->lod_img,(image_size*2),(image_size*2),color);
+	MagickSetImageColorspace(this->lod_img,sRGBColorspace);
+	MagickSetImageType(this->lod_img,TrueColorType);
+	MagickSetImageFormat(this->lod_img, "BMP" );
+	MagickSetImageDepth(this->lod_img, 32 );
 	
 	for (int i = 0; i < conv_zones.size(); ++i) {
 		QString id=QString("%L1").arg(conv_zones.at(i),3,10,QChar('0'));
@@ -277,7 +311,7 @@ void main_window::calc_total_zone (void) {
 	int comb_y=high_y-low_y;
 	image_size=256;
 	for (int i=1;i<10;i++) {	
-		if ( comb_x < image_size && comb_y < image_size )
+		if ( (comb_x+256) < image_size && (comb_y+256) < image_size )
 			break;
 		image_size+=image_size;
 	}
@@ -375,6 +409,7 @@ void main_window::read_zone_offsets(QString id) {
 }
 
 void main_window::build_zone(QString id) {
+
 	int status;	
 	int tex_depth=0;
 	int off_depth=0;
@@ -383,7 +418,7 @@ void main_window::build_zone(QString id) {
 	int height=0;
 	pixel_array = new float[1];
 	ipixel_array = new int[256];
-	ui.logview->append(QString("building heightmap"));
+	ui.logview->append(QString("building heightmap from zone %1").arg(id) );
 	ui.logview->repaint();
 	// terrain 
 	this->terrain_img=NewMagickWand();
@@ -399,6 +434,26 @@ void main_window::build_zone(QString id) {
 		QMessageBox::critical( 0, tr("Error"), QString("No file found")); 
 		return;
 	} 
+	// lod (256x256)
+	for (int y=0;y<8;y++) {
+		for (int x=0;x<8;x++) {
+			MagickWand *test_img=NewMagickWand();
+			status=MagickReadImage(test_img,QString("%1/zone%2/lod0%3-0%4.dds").arg(ui.builddir->text()).arg(id).arg(x).arg(y).toAscii());
+			if ( status != 1 ) {
+				QMessageBox::critical( 0, tr("Error"), QString("LOD:No file found")); 
+				return;
+			}
+			MagickSetImageType(test_img,TrueColorType);
+			MagickScaleImage(test_img,64,64);
+			if ( ! MagickCompositeImage(this->lod_img,test_img,OverCompositeOp ,((region_offset_x[id.toInt()]*32)*2)+(x*64)-(low_x*2),((region_offset_y[id.toInt()]*32) *2)+(y*64)-(low_y*2)) ) {
+				QMessageBox::critical( 0, tr("Error"), QString("Can't composite")); 
+			}
+		}
+	}
+	
+//	MagickCompositeImage(test_img,this->lod_img,AddCompositeOp ,0,0);
+	
+	
 	// read data from pcx files and combine to global map
 	for (int y=0;y<256;y++) {	
 		for (int x=0;x<256;x++) {
@@ -421,4 +476,10 @@ void main_window::write_height(QString file) {
 	ui.logview->append(QString("write %1").arg(file));
 	ui.logview->repaint();
 	MagickWriteImage(this->out_img,file.toAscii());
+}
+
+void main_window::write_lod(QString file) {
+	ui.logview->append(QString("write %1").arg(file));
+	ui.logview->repaint();
+	MagickWriteImage(this->lod_img,file.toAscii());
 }
