@@ -10,6 +10,7 @@
 #include <QTextStream>
 #include <QMessageBox>
 #include <QtGlobal>
+#include <QTableWidget>
 #include <wand/MagickWand.h>
 #include <math.h>
 
@@ -56,6 +57,8 @@ private:
 	QMap<QString,QString> nif_cgf;
 	QMap<QString,double> nif_cgf_scale;
 	QMap<QString,bool> nif_snow;
+	
+	QMap<QString,int> nif_counter;
 	
 	
 	

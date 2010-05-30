@@ -5,8 +5,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>496</width>
-    <height>510</height>
+    <width>790</width>
+    <height>522</height>
    </rect>
   </property>
   <property name="windowTitle" >
@@ -17,178 +17,227 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>496</width>
-     <height>491</height>
+     <width>790</width>
+     <height>503</height>
     </rect>
    </property>
-   <widget class="QGroupBox" name="groupBox" >
-    <property name="geometry" >
-     <rect>
-      <x>5</x>
-      <y>5</y>
-      <width>481</width>
-      <height>46</height>
-     </rect>
-    </property>
-    <property name="title" >
-     <string>Dark Age Of Camelot Directory:</string>
-    </property>
-    <widget class="QLineEdit" name="daocdir" >
-     <property name="geometry" >
-      <rect>
-       <x>10</x>
-       <y>15</y>
-       <width>366</width>
-       <height>24</height>
-      </rect>
-     </property>
-    </widget>
-    <widget class="QPushButton" name="daocdir_button" >
-     <property name="geometry" >
-      <rect>
-       <x>380</x>
-       <y>15</y>
-       <width>89</width>
-       <height>23</height>
-      </rect>
-     </property>
-     <property name="text" >
-      <string>Browse</string>
-     </property>
-    </widget>
-   </widget>
-   <widget class="QGroupBox" name="groupBox_2" >
-    <property name="geometry" >
-     <rect>
-      <x>5</x>
-      <y>50</y>
-      <width>481</width>
-      <height>46</height>
-     </rect>
-    </property>
-    <property name="title" >
-     <string>Build Directory</string>
-    </property>
-    <widget class="QLineEdit" name="builddir" >
-     <property name="geometry" >
-      <rect>
-       <x>10</x>
-       <y>15</y>
-       <width>366</width>
-       <height>24</height>
-      </rect>
-     </property>
-    </widget>
-    <widget class="QPushButton" name="builddir_button" >
-     <property name="geometry" >
-      <rect>
-       <x>380</x>
-       <y>15</y>
-       <width>89</width>
-       <height>23</height>
-      </rect>
-     </property>
-     <property name="text" >
-      <string>Browse</string>
-     </property>
-    </widget>
-   </widget>
-   <widget class="QPushButton" name="startbutton" >
-    <property name="geometry" >
-     <rect>
-      <x>390</x>
-      <y>460</y>
-      <width>89</width>
-      <height>23</height>
-     </rect>
-    </property>
-    <property name="text" >
-     <string>Build</string>
-    </property>
-   </widget>
-   <widget class="QGroupBox" name="groupBox_3" >
+   <widget class="QTabWidget" name="tabView" >
     <property name="geometry" >
      <rect>
       <x>10</x>
-      <y>140</y>
-      <width>481</width>
-      <height>286</height>
+      <y>10</y>
+      <width>771</width>
+      <height>491</height>
      </rect>
     </property>
-    <property name="title" >
-     <string>Buildlog</string>
+    <property name="currentIndex" >
+     <number>0</number>
     </property>
-    <widget class="QTextEdit" name="logview" >
+    <widget class="QWidget" name="tab" >
      <property name="geometry" >
       <rect>
-       <x>10</x>
-       <y>20</y>
-       <width>456</width>
-       <height>256</height>
+       <x>0</x>
+       <y>0</y>
+       <width>767</width>
+       <height>467</height>
       </rect>
      </property>
+     <attribute name="title" >
+      <string>Conversion</string>
+     </attribute>
+     <widget class="QGroupBox" name="groupBox" >
+      <property name="geometry" >
+       <rect>
+        <x>10</x>
+        <y>10</y>
+        <width>481</width>
+        <height>46</height>
+       </rect>
+      </property>
+      <property name="title" >
+       <string>Dark Age Of Camelot Directory:</string>
+      </property>
+      <widget class="QLineEdit" name="daocdir" >
+       <property name="geometry" >
+        <rect>
+         <x>10</x>
+         <y>15</y>
+         <width>366</width>
+         <height>24</height>
+        </rect>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="daocdir_button" >
+       <property name="geometry" >
+        <rect>
+         <x>380</x>
+         <y>15</y>
+         <width>89</width>
+         <height>23</height>
+        </rect>
+       </property>
+       <property name="text" >
+        <string>Browse</string>
+       </property>
+      </widget>
+     </widget>
+     <widget class="QGroupBox" name="groupBox_2" >
+      <property name="geometry" >
+       <rect>
+        <x>10</x>
+        <y>60</y>
+        <width>481</width>
+        <height>46</height>
+       </rect>
+      </property>
+      <property name="title" >
+       <string>Build Directory</string>
+      </property>
+      <widget class="QLineEdit" name="builddir" >
+       <property name="geometry" >
+        <rect>
+         <x>10</x>
+         <y>15</y>
+         <width>366</width>
+         <height>24</height>
+        </rect>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="builddir_button" >
+       <property name="geometry" >
+        <rect>
+         <x>380</x>
+         <y>15</y>
+         <width>89</width>
+         <height>23</height>
+        </rect>
+       </property>
+       <property name="text" >
+        <string>Browse</string>
+       </property>
+      </widget>
+     </widget>
+     <widget class="QLabel" name="label" >
+      <property name="geometry" >
+       <rect>
+        <x>360</x>
+        <y>110</y>
+        <width>31</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="text" >
+       <string>Build:</string>
+      </property>
+     </widget>
+     <widget class="QComboBox" name="map_select" >
+      <property name="geometry" >
+       <rect>
+        <x>393</x>
+        <y>110</y>
+        <width>101</width>
+        <height>22</height>
+       </rect>
+      </property>
+      <item>
+       <property name="text" >
+        <string>Albion</string>
+       </property>
+      </item>
+      <item>
+       <property name="text" >
+        <string>Midgard</string>
+       </property>
+      </item>
+      <item>
+       <property name="text" >
+        <string>Hibernia</string>
+       </property>
+      </item>
+      <item>
+       <property name="text" >
+        <string>Thidranki</string>
+       </property>
+      </item>
+      <item>
+       <property name="text" >
+        <string>New Frontier</string>
+       </property>
+      </item>
+      <item>
+       <property name="text" >
+        <string>TOA</string>
+       </property>
+      </item>
+     </widget>
+     <widget class="QGroupBox" name="groupBox_3" >
+      <property name="geometry" >
+       <rect>
+        <x>10</x>
+        <y>140</y>
+        <width>481</width>
+        <height>286</height>
+       </rect>
+      </property>
+      <property name="title" >
+       <string>Buildlog</string>
+      </property>
+      <widget class="QTextEdit" name="logview" >
+       <property name="geometry" >
+        <rect>
+         <x>10</x>
+         <y>20</y>
+         <width>456</width>
+         <height>256</height>
+        </rect>
+       </property>
+      </widget>
+     </widget>
+     <widget class="QPushButton" name="startbutton" >
+      <property name="geometry" >
+       <rect>
+        <x>400</x>
+        <y>430</y>
+        <width>89</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="text" >
+       <string>Build</string>
+      </property>
+     </widget>
     </widget>
-   </widget>
-   <widget class="QComboBox" name="map_select" >
-    <property name="geometry" >
-     <rect>
-      <x>373</x>
-      <y>110</y>
-      <width>101</width>
-      <height>22</height>
-     </rect>
-    </property>
-    <item>
-     <property name="text" >
-      <string>Albion</string>
+    <widget class="QWidget" name="tab_2" >
+     <property name="geometry" >
+      <rect>
+       <x>0</x>
+       <y>0</y>
+       <width>767</width>
+       <height>467</height>
+      </rect>
      </property>
-    </item>
-    <item>
-     <property name="text" >
-      <string>Midgard</string>
-     </property>
-    </item>
-    <item>
-     <property name="text" >
-      <string>Hibernia</string>
-     </property>
-    </item>
-    <item>
-     <property name="text" >
-      <string>Thidranki</string>
-     </property>
-    </item>
-    <item>
-     <property name="text" >
-      <string>New Frontier</string>
-     </property>
-    </item>
-    <item>
-     <property name="text" >
-      <string>TOA</string>
-     </property>
-    </item>
-   </widget>
-   <widget class="QLabel" name="label" >
-    <property name="geometry" >
-     <rect>
-      <x>340</x>
-      <y>110</y>
-      <width>31</width>
-      <height>21</height>
-     </rect>
-    </property>
-    <property name="text" >
-     <string>Build:</string>
-    </property>
+     <attribute name="title" >
+      <string>Info</string>
+     </attribute>
+     <widget class="QTableWidget" name="table_list" >
+      <property name="geometry" >
+       <rect>
+        <x>10</x>
+        <y>10</y>
+        <width>751</width>
+        <height>451</height>
+       </rect>
+      </property>
+     </widget>
+    </widget>
    </widget>
   </widget>
   <widget class="QStatusBar" name="statusbar" >
    <property name="geometry" >
     <rect>
      <x>0</x>
-     <y>491</y>
-     <width>496</width>
+     <y>503</y>
+     <width>790</width>
      <height>19</height>
     </rect>
    </property>
