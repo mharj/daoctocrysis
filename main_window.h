@@ -33,11 +33,13 @@ private:
 	void add_nifs_to_xml(QString);
 	void save_xml(QString);
 	void write_height(QString);
+	void write_lod(QString);
 	void read_zone_offsets(QString);
 	void calc_total_zone(void);
 	void build_height(QString);
 	void read_tree_conversion(QString);
 	MagickWand *out_img;
+	MagickWand *lod_img;
 	MagickWand *terrain_img;
 	MagickWand *offset_img;
 	QDomDocument domDocument;

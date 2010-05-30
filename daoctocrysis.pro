@@ -1,9 +1,10 @@
 TEMPLATE = app
-TARGET = daoctocrysis
+TARGET = DaocToCrysis
 QT += core gui xml sql
 HEADERS += qt_dempak.h main_window.h
 SOURCES += main.cpp qt_dempak.cpp main_window.cpp
-CONFIG  += qt warn_on release console
+CONFIG  += qt warn_on release 
+CONFIG -= console
 LIBS += -L/usr/lib -L/usr/lib/X11 -lz -lMagick++ -lMagickWand -lMagickCore -Wl,-Bsymbolic-functions 
 INCLUDEPATH += /usr/include/ImageMagick
 FORMS += main_window.ui
